@@ -1,0 +1,15 @@
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# General
+.DS_Store
+*.log
+*.tmp
+*.bak
+
+# Temp / build
+/node_modules/
+/dist/
+/build/
