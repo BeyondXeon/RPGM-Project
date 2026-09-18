@@ -46,3 +46,93 @@
   value: 3 + 1 autosave
   source: design/gdd/save-state.md
   referenced_by: []
+
+- name: bark_tier
+  type: formula
+  variables: [rep_rank, turf]
+  output: pool 0-2 + line variant
+  source: design/gdd/dialogue-events.md
+  referenced_by: []
+
+- name: rep_rank_scale
+  type: constant
+  value: 0-4 None to Legend
+  note: provisional — Heat/Rep GDD owns
+  source: design/gdd/dialogue-events.md
+  referenced_by: []
+
+- name: bark_pools_cap
+  type: constant
+  value: 3 street + 3 hub per district, 18 game-wide max
+  source: design/gdd/dialogue-events.md
+  referenced_by: []
+
+- name: gig_payout
+  type: formula
+  variables: [base, messy]
+  output: 50-500
+  source: design/gdd/gig-board.md
+  referenced_by: []
+
+- name: gig_statuses
+  type: constant
+  values: [available, active, resolved-ghost, resolved-loud, resolved-mixed, resolved-messy, failed]
+  source: design/gdd/gig-board.md
+  referenced_by: []
+
+- name: tier_bases
+  type: constant
+  values: {street: 100, corporate: 250, black-ice: 500}
+  source: design/gdd/gig-board.md
+  referenced_by: []
+
+- name: gig_count
+  type: constant
+  value: 15 (5/5/5)
+  source: design/gdd/gig-board.md
+  referenced_by: []
+
+- name: suspicion
+  type: formula
+  variables: [rate, grace, decay, thresholds]
+  output: 0-180 Calm/Suspicious/Alert
+  source: design/gdd/stealth-patrol.md
+  referenced_by: []
+
+- name: cone_geometry
+  type: constant
+  value: range 4, ±1 lateral at distances 1-3
+  source: design/gdd/stealth-patrol.md
+  referenced_by: []
+
+- name: approach_grading
+  type: constant
+  values: {ghost: never Alert, mixed: Alert evaded without battle, loud: any battle}
+  source: design/gdd/stealth-patrol.md
+  referenced_by: []
+
+- name: turret_strike
+  type: formula
+  variables: [district_index]
+  output: 120-420
+  source: design/gdd/breach-combat.md
+  referenced_by: []
+
+- name: hack_tp_costs
+  type: constant
+  values: {camera: 20, door: 30, turret: 40}
+  note: TP max 100, rebuilds per battle
+  source: design/gdd/breach-combat.md
+  referenced_by: []
+
+- name: hack_targets
+  type: constant
+  values: {camera: stun 1 turn + reveal, turret: friendly fire once, door: seal one wave}
+  source: design/gdd/breach-combat.md
+  referenced_by: []
+
+- name: troop_cap
+  type: constant
+  value: 4 enemies + 1 object set
+  source: design/gdd/breach-combat.md
+  referenced_by: []
