@@ -24,22 +24,23 @@
 
 - name: overlay_sets_cap
   type: constant
-  value: 12
+  value: 15 (3 districts × 5 enumerated turf states)
   source: design/gdd/district-maps.md
   referenced_by: []
 
-- name: needs_migration
+- name: load_action
   type: formula
   variables: [save.version, CURRENT_VERSION]
-  output: boolean
+  output: migrate | load | refuse
   source: design/gdd/save-state.md
   referenced_by: []
 
 - name: ch_schema
   type: constant
-  fields: [version, districts, heat, rep, gigs, secrets, crew, implants, faction]
+  fields: [version, districts{id,unlocked,turf,tags}, heat, rep(lifetime pts), gigs{id:{status,approach,retries}}, secrets["district:key"], crew[], implants{}, faction{}, flags{}, meta{intro_done,hints_fired}]
+  note: meta added 2026-09-18; full field shapes fixed in save-state revision 2026-09-19; credits explicitly in $gameParty gold (no field)
   source: design/gdd/save-state.md
-  referenced_by: []
+  referenced_by: [design/gdd/onboarding.md, design/gdd/gig-board.md, design/gdd/heat-rep-turf.md, design/gdd/dialogue-events.md, design/gdd/district-maps.md]
 
 - name: manual_slots
   type: constant
@@ -57,9 +58,9 @@
 - name: rep_rank_scale
   type: constant
   value: 0-4 None to Legend
-  note: provisional — Heat/Rep GDD owns
-  source: design/gdd/dialogue-events.md
-  referenced_by: []
+  note: confirmed by Heat/Rep GDD 2026-09-18 (was provisional)
+  source: design/gdd/heat-rep-turf.md
+  referenced_by: [design/gdd/dialogue-events.md]
 
 - name: bark_pools_cap
   type: constant
@@ -135,4 +136,36 @@
   type: constant
   value: 4 enemies + 1 object set
   source: design/gdd/breach-combat.md
+  referenced_by: []
+
+- name: approach_payloads
+  type: constant
+  values: {ghost: rep+2/heat+0, loud: rep+1/heat+3, mixed: rep+1/heat+1, messy: rep+0/heat+3}
+  note: loud heat 2→3 in 2026-09-19 loud-tax rebalance
+  source: design/gdd/heat-rep-turf.md
+  referenced_by: [design/gdd/gig-board.md]
+
+- name: heat_bands
+  type: constant
+  values: {Calm: 0-24, Warm: 25-69, Hot: 70-100}
+  note: Warm 30→25, decay -10→-5 in 2026-09-19 rebalance
+  source: design/gdd/heat-rep-turf.md
+  referenced_by: []
+
+- name: turf_flip_count
+  type: constant
+  value: 3 gross tags for X, counters reset on flip
+  source: design/gdd/heat-rep-turf.md
+  referenced_by: []
+
+- name: intro_time_cap
+  type: constant
+  value: 12 min hard cap, 10 min target
+  source: design/gdd/onboarding.md
+  referenced_by: []
+
+- name: starter_gigs
+  type: constant
+  value: 2
+  source: design/gdd/onboarding.md
   referenced_by: []

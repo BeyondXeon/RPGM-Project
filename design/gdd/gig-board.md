@@ -60,9 +60,9 @@ The `gig_payout` formula is defined as:
 | Messy modifier | messy | float | 0.5 or 1.0 | 1.0 clean resolve (ghost/loud/mixed) · 0.5 messy resolve after failed retry |
 
 **Output Range:** 50 to 500 credits per gig; lifetime gig income ≈ 15 gigs averaging ~250 = ~3,750 credits (no dedicated economy system — credits spend on implants/gear defined in their GDDs; sinks must match this faucet).
-**Example:** corporate gig resolved loud: 250 × 1.0 = 250 credits + loud meter payload (heat+2, rep+1); same gig messy: 125 credits + heat+3.
+**Example:** corporate gig resolved loud: 250 × 1.0 = 250 credits + loud meter payload (heat+3, rep+1); same gig messy: 125 credits + heat+3.
 
-Approach meter payloads (per gig, applied alongside credits): ghost → rep+2, heat+0 · loud → rep+1, heat+2 · mixed → rep+1, heat+1 · messy → rep+0, heat+3. Exact magnitudes provisional — the Heat/Rep GDD owns final numbers.
+Approach meter payloads (per gig, applied alongside credits): ghost → rep+2, heat+0 · loud → rep+1, heat+3 · mixed → rep+1, heat+1 · messy → rep+0, heat+3. Final per Heat/Rep GDD (2026-09-19 loud-tax rebalance).
 
 ## Edge Cases
 

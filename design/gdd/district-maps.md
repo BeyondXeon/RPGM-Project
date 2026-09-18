@@ -17,13 +17,14 @@ You own these streets. The fantasy is hard-won local mastery: the Sump's patrol 
 
 ### Core Rules
 
-1. Three districts unlock linearly (Sump → Market → Spire) via story-beat flags; transfers between districts are gated events, not open exits.
+1. Three districts unlock linearly (Sump → Market → Spire) via story-beat flags; transfers between districts are gated events, not open exits. Gig choice is free within unlocked districts — linearity governs access, never job selection.
 2. Each district contains: a street web (exploration + patrols), one amber hub (safe — no patrols, crew + fixers, shop/heal), and gig interiors (2–4 per district).
-3. Zone logic is exposed through **region IDs** (provisional contract for implementation): R1–R9 patrol routes · R10–R19 restricted/alert zones · R20–R29 secret areas · R30+ reserved. Stealth reads these; exact numbering finalized in implementation.
-4. Each map carries metadata: `districtId`, `turfState`, `lightingPreset` — read by gigs, patrols, and lighting as contracts.
+3. Zone logic is exposed through **region IDs**: R1–R9 patrol routes · R10–R19 restricted/alert zones · R20–R29 secret areas · R30+ reserved (exact numbering finalized in implementation). Priority rule: no tile carries two region meanings — enforced at map audit; if violated, secret > restricted > patrol. Stealth reads these.
+4. Each map carries metadata as note-tags: `<chDistrict:sump|market|spire>`, `<chTurf:contested|owned_wardens|owned_chrome|owned_ghosts|resolved>`, `<chLight:sump_night|market_neon|spire_cold|hub_amber|alert_red>` — read by gigs, patrols, and lighting as contracts; validated on map load by the District loader (evented common event; plugin handoff owned by prototype).
 5. Turf is shown by **overlay swaps on a single map**: poster variants, lighting preset shifts, patrol-density changes keyed to turf state. No duplicate maps.
 6. Secrets: 3–5 per district — at least one hidden gig, one lore cache, one shortcut each.
 7. The player CANNOT: leave a district except via its transfers · enter locked districts early · move turf by walking (only gigs and story beats move meters).
+8. Patrols are pre-placed events (max 8 slots per street map), toggled ON/OFF by turf-state switches derived from `patrol_density`; units beyond the computed count stay OFF. Detector checks stagger across frames (even/odd units alternate).
 
 ### States and Transitions
 
@@ -31,8 +32,8 @@ You own these streets. The fantasy is hard-won local mastery: the Sump's patrol 
 |---|---|---|
 | Locked | District unreachable, transfer sealed | → Active on story-beat flag |
 | Active (Contested) | Playable, turf fluid | → Owned on faction threshold |
-| Active (Owned:X) | Playable, overlays show faction X skin | → Owned:Y if turf flips |
-| Resolved | Post-finale state, free roam, no new gigs | Terminal (endgame) |
+| Active (Owned:X) | Playable, overlays show faction X skin (X ∈ Wardens, Chrome, Ghosts) | → Owned:Y on fresh 3 gross tags for Y after reset (heat-rep-turf owns the rule) |
+| Resolved | Post-finale free roam, patrols persist at −2 mod, no new gigs | Terminal (endgame) |
 
 ### Interactions with Other Systems
 
@@ -53,12 +54,12 @@ The `patrol_density` formula is defined as:
 | Variable | Symbol | Type | Range | Description |
 |---|---|---|---|---|
 | District base | base | int | 2–6 | Patrol units on the map at Contested baseline; Sump 3, Market 4, Spire 5 |
-| Turf modifier | mod | int | −1 to +2 | Contested +0 · Owned (player-allied) −1 · Owned (hostile) +2 · Resolved −2 (min 1) |
+| Turf modifier | mod | enum-mapped int | {+0 Contested, −1 player-allied Owned, +2 hostile Owned, −2 Resolved} — allied/hostile mapping owned by heat-rep-turf.md | Per enumerated turf state; clamp [1, 8] applied last |
 
 **Output Range:** 1 to 8 patrol units per street map under normal play; clamped to [1, 8] at extremes (never zero — streets never feel dead; never above 8 — perf + readability cap).
 **Example:** Market (base 4) under hostile ownership: 4 + 2 = 6 patrol units.
 
-Turf overlay selection is a deterministic lookup, not a formula: `overlay_set = overlays[districtId][turfState]` — exactly one set per combination (3 districts × 4 states = 12 sets max, Pillar 4 cap).
+Turf overlay selection is a deterministic lookup, not a formula: `overlay_set = overlays[districtId][turfState]` over the enumerated states (contested, owned_wardens, owned_chrome, owned_ghosts, resolved) — exactly one set per combination (3 districts × 5 states = 15 sets max, Pillar 4 cap).
 
 ## Edge Cases
 
@@ -66,7 +67,7 @@ Turf overlay selection is a deterministic lookup, not a formula: `overlay_set = 
 - **If a transfer flag is set while the player stands on the exit tile**: the exit resolves normally; the new district state applies on arrival.
 - **If a discovered secret is re-entered**: discovery flags prevent double rewards; lore caches show "already recovered" text.
 - **If the density formula meets a tiny map**: interiors and hubs use gig-scripted patrols only and never the formula; street maps clamp output to [1, 8].
-- **If a save with stale turf data is loaded**: turf defaults to Contested. Rationale: safe neutral state, no free faction advantage.
+- **If a save with stale turf data is loaded**: fall back to the last persisted valid turf state; only saves with no turf key at all default to Contested. Rationale: the map must not forget earned ownership (Pillar 2).
 - **If the player re-enters maps to reset patrols for a better ghost rating** (degenerate strategy): the rating locks at gig completion; re-entry cannot improve it.
 
 ## Dependencies
@@ -83,16 +84,16 @@ Turf overlay selection is a deterministic lookup, not a formula: `overlay_set = 
 ## Tuning Knobs
 
 - **base_patrols per district** (2–6; Sump 3, Market 4, Spire 5): too high = unreadable streets + event perf hit; too low = dead city.
-- **turf_modifier per state** (−2 to +2): interacts with base — high base + hostile mod hits the 8-cap, flattening district differences. Retune base down before raising mods.
+- **turf_modifier per state** ({+0, −1, +2, −2}): at shipped bases (3/4/5) outputs top out at 5/6/7 — the 8-clamp is headroom reserved for the Warm-band +1 patrol check (heat-rep-turf.md), not reachable in normal play. Retune base down before raising mods.
 - **secrets_per_district** (3–5): more = explorer joy, but each secret needs a gig, lore, or shortcut payload per Pillar 4 — count without payload is cut content wearing a trench coat.
-- **overlay_sets_cap** (12 max): more sets = art debt at one set per district × state; raise only with art-bible sign-off.
+- **overlay_sets_cap** (15 max): 3 districts × 5 enumerated turf states; more sets = art debt — raise only with art-bible sign-off.
 - **hub_safe** (boolean, default true): hubs are patrol-free by contract. Turning off breaks the amber-safety color promise — do not touch without an art-bible revision.
 
 ## Visual/Audio Requirements
 
 - **Streets**: district accent carried on signage + light bars over the Abyss Blue base; verticals oppress, neon horizontals mark routes.
 - **Infiltration**: ambient dims to ~40%; sightlines and hackables glow (light-is-information).
-- **Turf flips**: poster variants + lighting preset shift + patrol-density change (12 overlay sets max across 3 districts × 4 states).
+- **Turf flips**: poster variants + lighting preset shift + patrol-density change (15 overlay sets max across 3 districts × 5 states).
 - **Hubs**: amber practicals, low contrast, zero patrols.
 - **Audio**: per-district ambient beds (Sump: low industrial hum · Market: crowd-murmur synth · Spire: sterile high tone) + turf-shift sting + secret-discovery chime, all from the shared synth kit.
 
@@ -113,7 +114,11 @@ Turf overlay selection is a deterministic lookup, not a formula: `overlay_set = 
 - **GIVEN** any street map, **WHEN** patrols spawn, **THEN** count equals base+mod clamped to [1, 8].
 - **GIVEN** a secret found, **WHEN** re-entered, **THEN** no duplicate reward is granted.
 - **GIVEN** the 60fps budget, **WHEN** a street map runs at full patrol count, **THEN** frame time stays under 16.6ms on target PC hardware.
-- **GIVEN** a stale-turf save, **WHEN** loaded, **THEN** turf reads Contested.
+- **GIVEN** a stale-turf save WITH a persisted valid state, **WHEN** loaded, **THEN** that state is kept; **GIVEN** a save with no turf key, **WHEN** loaded, **THEN** turf reads Contested.
+- **GIVEN** a tile painted with two region meanings, **WHEN** audited, **THEN** the map fails audit (secret > restricted > patrol fallback applies at runtime).
+- **GIVEN** a map missing any of the three note-tags, **WHEN** loaded, **THEN** load is refused with the missing tag named.
+- **GIVEN** a Resolved district, **WHEN** entered, **THEN** patrols spawn at base−2 (Sump 1, Market 2, Spire 3) with no gigs offered.
+- **GIVEN** any hub map, **WHEN** entered, **THEN** zero patrol units spawn.
 
 ## Open Questions
 

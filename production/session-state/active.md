@@ -1,10 +1,11 @@
 # Active Session State
 
-- **Task**: Breach Combat + Hack GDD
-- **Status**: Complete (all 8 + 3 optional sections; pending fresh-session review)
-- **File**: design/gdd/breach-combat.md
-- **Sections**: All written
-- **Next**: Heat/Rep/Turf Reactivity (order #7) or fresh-session /design-review
+- **Task**: Design reviews (District Maps + Save-State APPROVED)
+- **Status**: Review batch in progress — 2/8 approved
+- **Next**: Dialogue & Narrative Events review (order #3) or commit
+<!-- CONSISTENCY-CHECK: 2026-09-19 | GDDs checked: 8 | Conflicts found: 0 | Verdict: PASS -->
+<!-- CONSISTENCY-CHECK: 2026-09-18 | GDDs checked: 8 | Conflicts found: 0 (1 schema gap fixed: ch_schema +meta) | Verdict: PASS -->
+<!-- CONSISTENCY-CHECK: 2026-09-18 | GDDs checked: 7 | Conflicts found: 0 | Verdict: PASS -->
 <!-- CONSISTENCY-CHECK: 2026-09-18 | GDDs checked: 6 | Conflicts found: 0 | Verdict: PASS -->
 <!-- CONSISTENCY-CHECK: 2026-09-18 | GDDs checked: 5 | Conflicts found: 0 | Verdict: PASS -->
 <!-- CONSISTENCY-CHECK: 2026-09-18 | GDDs checked: 4 | Conflicts found: 0 | Verdict: PASS -->

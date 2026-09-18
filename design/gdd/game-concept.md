@@ -68,7 +68,7 @@ One sentence: **steal the gig, hack the room, watch the whole district react.**
 
 ### Core Mechanics (Systems we build)
 
-1. **Gig board + district maps** — pick jobs freely across 3 neon districts; event-driven stealth sightlines, patrols, hackable map objects.
+1. **Gig board + district maps** — pick jobs freely across 3 neon districts (gig choice is free within unlocked districts; district access unlocks linearly Sump → Market → Spire by story beat); event-driven stealth sightlines, patrols, hackable map objects.
 2. **Breach combat** — turn-based battles with a Hack command that turns cameras, turrets, and doors against enemies.
 3. **Heat / rep / turf meters** — every gig moves visible meters; heat triggers pursuit pressure, rep unlocks fixer tiers and gigs.
 4. **Chrome implants (light)** — 3 tiers of implants that unlock new options (new hack targets, new approaches), never just +numbers.
