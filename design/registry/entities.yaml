@@ -1,0 +1,48 @@
+# Entity Registry — CHROME HEART CITY
+# Cross-system facts owned by GDDs. Values here are locked: a GDD that needs
+# different values must surface the conflict, never silently diverge.
+
+- name: patrol_density
+  type: formula
+  variables: [base, mod]
+  output: 1-8
+  source: design/gdd/district-maps.md
+  referenced_by: []
+
+- name: district_base_patrols
+  type: constant
+  values: {Sump: 3, Market: 4, Spire: 5}
+  source: design/gdd/district-maps.md
+  referenced_by: []
+
+- name: region_id_ranges
+  type: constant
+  values: {patrol: R1-9, restricted: R10-19, secret: R20-29, reserved: R30+}
+  note: provisional — finalized in implementation
+  source: design/gdd/district-maps.md
+  referenced_by: []
+
+- name: overlay_sets_cap
+  type: constant
+  value: 12
+  source: design/gdd/district-maps.md
+  referenced_by: []
+
+- name: needs_migration
+  type: formula
+  variables: [save.version, CURRENT_VERSION]
+  output: boolean
+  source: design/gdd/save-state.md
+  referenced_by: []
+
+- name: ch_schema
+  type: constant
+  fields: [version, districts, heat, rep, gigs, secrets, crew, implants, faction]
+  source: design/gdd/save-state.md
+  referenced_by: []
+
+- name: manual_slots
+  type: constant
+  value: 3 + 1 autosave
+  source: design/gdd/save-state.md
+  referenced_by: []
