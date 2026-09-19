@@ -19,7 +19,7 @@ You're a natural. The fantasy is instant competence — ninety seconds in you're
 
 1. Five-beat sequence (~10 min): fixer intro 1.5 (hub, amber safety) → movement + interaction basics 1.5 → guided gig 3, scripted ghost success (calm patrols, generous cones) → scripted battle demo 2 (rigged troop, Hack tutorialized: Camera first, then free choice) → board opens with 2 starter gigs + fading hints armed 2. Runtime overruns absorb into beat 5 (free play compresses); authoring cuts hit beat 2 first (competence beats 3–4 are sacred).
 2. Guided variants only — no new mechanics: calm patrols (Stealth), rigged troop (Breach), beat-template dialogue (Dialogue), payload override (rule 3).
-3. Guided-gig payload override: the guided gig suppresses ALL meter payloads (no heat/rep/tags regardless of approach) and pays street-base credits only — the first real gig is the first meter movement. Tutorial debriefs still record approach for the variant line.
+3. Guided-gig payload override: the guided gig suppresses ALL meter payloads (no heat/rep/tags regardless of approach) and pays street-base credits only (= 100, gig-board street base) — the first real gig is the first meter movement. Tutorial debriefs still record approach for the variant line.
 4. Both paths taught: ghost first (the fantasy hook), loud second (the safety net) — the player learns failure has a fun exit before their first real gig.
 5. Skippable: replay sense lives OUTSIDE `ch` — a global `ConfigManager` key (`ch_introDone`, survives New Game) drives a title/new-game branch offering skip ("Skip intro?"); skip jumps to board-open with starter gigs, all tutorial flags set.
 6. Fading hints (~30 min post-intro): contextual one-liners on first-time triggers (first Alert, first Hack menu, first Warm band); each fires once, tracked in `ch.meta.hints_fired`; never during combat turns.
@@ -31,7 +31,7 @@ You're a natural. The fantasy is instant competence — ninety seconds in you're
 |---|---|---|
 | Intro: Unplayed | Fresh run | → Playing on skip-decline · → Board-Open on skip-accept |
 | Intro: Playing | Guided beats 1–5 | → Board-Open on gig resolution |
-| Intro: Done | Flag in `ch` | Enables skip prompt on future runs |
+| Intro: Done | Global `ConfigManager` key set | Enables skip branch on future runs (never a `ch` flag — `ch` rebuilds on New Game) |
 | Hints: Armed | Post-intro, unfired triggers live | → Spent per trigger, one shot each |
 
 ### Interactions with Other Systems
@@ -63,7 +63,7 @@ No mathematical formulas exist in this system. The binding calculation is the ti
 ## Edge Cases
 
 - **If the player goes loud in the guided gig**: resolves normally — the debrief acknowledges the noise via the loud variant. Ghost is scripted likely, never forced.
-- **If the player loses the rigged battle**: mercy floor — Troop page, condition Actor HP ≤ 25%, span Once: Change HP sets the actor to 1 + tutorial line plays. A second lethal hit resolves normally (defeat → gig Failed → retry per Gig Board).
+- **If the player loses the rigged battle**: mercy floor — Troop page, condition leader Actor (ID 1) HP ≤ 25%, span Once (page scope): Change HP sets the leader to 1 + tutorial line plays. A second lethal hit resolves normally (defeat → gig Failed → retry per Gig Board).
 - **If the player skips**: all tutorial flags set, starter gigs issued, hints armed — skipping never strands state.
 - **If a hint trigger fires mid-combat-turn**: queued to battle end — hints never interrupt turns.
 - **If the intro exceeds 12 minutes in testing**: cut from beat 2 (basics), never from beats 3–4 (the competence fantasy lives there).

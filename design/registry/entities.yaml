@@ -37,8 +37,8 @@
 
 - name: ch_schema
   type: constant
-  fields: [version, districts{id,unlocked,turf,tags}, heat, rep(lifetime pts), gigs{id:{status,approach,retries}}, secrets["district:key"], crew[], implants{}, faction{}, flags{}, meta{intro_done,hints_fired}]
-  note: meta added 2026-09-18; full field shapes fixed in save-state revision 2026-09-19; credits explicitly in $gameParty gold (no field)
+  fields: [version, districts{id,unlocked,turf,tags}, heat, rep(lifetime pts), gigs{id:{status,approach,retries}}, secrets["district:key"], crew[], implants{}, faction{}, flags{}, meta{hints_fired}, ConfigManager.ch_introDone(global)]
+  note: intro_done moved OUT of ch.meta to global ConfigManager key 2026-09-19 (MZ New-Game semantics); credits explicitly in $gameParty gold (no field)
   source: design/gdd/save-state.md
   referenced_by: [design/gdd/onboarding.md, design/gdd/gig-board.md, design/gdd/heat-rep-turf.md, design/gdd/dialogue-events.md, design/gdd/district-maps.md]
 
@@ -64,7 +64,7 @@
 
 - name: bark_pools_cap
   type: constant
-  value: 3 street + 3 hub per district, 18 game-wide max
+  value: 18 pool objects max (3 bands × 2 contexts × 3 districts), ≤3 variants each, ≈108 bark lines ceiling
   source: design/gdd/dialogue-events.md
   referenced_by: []
 
@@ -95,8 +95,8 @@
 
 - name: suspicion
   type: formula
-  variables: [rate, grace, decay, thresholds]
-  output: 0-180 Calm/Suspicious/Alert
+  variables: [rate_per_unit, sus_hold_300f, alert_hold_480f, thresholds_60_180]
+  output: per-unit 0-180 Calm/Suspicious/Alert; exits on wall-clock holds
   source: design/gdd/stealth-patrol.md
   referenced_by: []
 
@@ -122,7 +122,7 @@
 - name: hack_tp_costs
   type: constant
   values: {camera: 20, door: 30, turret: 40}
-  note: TP max 100, rebuilds per battle
+  note: TP max 100, start 30, +20/turn
   source: design/gdd/breach-combat.md
   referenced_by: []
 
@@ -135,6 +135,13 @@
 - name: troop_cap
   type: constant
   value: 4 enemies + 1 object set
+  source: design/gdd/breach-combat.md
+  referenced_by: []
+
+- name: enemy_hp_bands
+  type: constant
+  values: {sump_grunt: 280-340, sump_brute: 420-520, market_grunt: 450-550, market_brute: 650-800, spire_elite: 800-1000, boss: 1200+}
+  note: turret tuned to 40-60% chunk, never a kill
   source: design/gdd/breach-combat.md
   referenced_by: []
 

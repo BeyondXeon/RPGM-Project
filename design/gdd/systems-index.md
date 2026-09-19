@@ -17,20 +17,20 @@ CHROME HEART CITY is a 3–4 hour cyberpunk street-crew JRPG (RPG Maker MZ): an 
 
 | # | System Name | Category | Priority | Status | Design Doc | Depends On |
 |---|-------------|----------|----------|--------|------------|------------|
-| 1 | Gig Board & Missions | Gameplay | MVP | In Review | design/gdd/gig-board.md | District Maps, Save-State |
-| 2 | Stealth & Patrol | Gameplay | MVP | In Review | design/gdd/stealth-patrol.md | District Maps |
-| 3 | Breach Combat + Hack | Gameplay | MVP | In Review | design/gdd/breach-combat.md | Save-State |
+| 1 | Gig Board & Missions | Gameplay | MVP | Approved | design/gdd/gig-board.md | District Maps, Save-State |
+| 2 | Stealth & Patrol | Gameplay | MVP | Approved | design/gdd/stealth-patrol.md | District Maps |
+| 3 | Breach Combat + Hack | Gameplay | MVP | Approved | design/gdd/breach-combat.md | Save-State |
 | 4 | Heat/Rep/Turf Reactivity | Gameplay | MVP | Approved | design/gdd/heat-rep-turf.md | Gig Board, Save-State |
 | 5 | Chrome Implants | Progression | Vertical Slice | Not Started | — | Breach Combat, Stealth |
 | 6 | Faction & Endings | Narrative | Vertical Slice | Not Started | — | Heat/Rep/Turf, Dialogue |
 | 7 | Crew & Recruitment | Narrative | Alpha | Not Started | — | Breach Combat, Dialogue |
 | 8 | District Maps & Exploration | World | MVP | Approved | design/gdd/district-maps.md | — |
 | 9 | Save-State & Persistence (inferred) | Persistence | MVP | Approved | design/gdd/save-state.md | — |
-| 10 | Onboarding (inferred) | Meta | MVP | Designed | design/gdd/onboarding.md | Gig Board, Stealth |
+| 10 | Onboarding (inferred) | Meta | MVP | Approved | design/gdd/onboarding.md | Gig Board, Stealth |
 | 11 | Deck-OS UI/HUD | UI | Vertical Slice | Not Started | — | Gig Board, Heat/Rep/Turf |
 | 12 | Lighting & Atmosphere (inferred) | Presentation | Vertical Slice | Not Started | — | District Maps |
 | 13 | Audio Direction (inferred) | Audio | Vertical Slice | Not Started | — | — |
-| 14 | Dialogue & Narrative Events (inferred) | Narrative | MVP | In Review | design/gdd/dialogue-events.md | — |
+| 14 | Dialogue & Narrative Events (inferred) | Narrative | MVP | Approved | design/gdd/dialogue-events.md | — |
 
 ---
 
@@ -141,6 +141,7 @@ None found. Heat/Rep/Turf and Faction & Endings flow one direction (meters → s
 | Design docs reviewed | 0 |
 | Design docs approved | 0 |
 | MVP systems designed | 8/8 |
+| MVP systems approved | 8/8 |
 | Vertical Slice systems designed | 0/5 |
 
 ---

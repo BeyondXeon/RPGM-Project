@@ -17,11 +17,11 @@ You're the hottest freelancer on the feed. The fantasy is chosen work, chosen wa
 
 ### Core Rules
 
-1. The board shows only district + rep-eligible gigs; tier ladder runs street → corporate → black-ice.
+1. The board is evented (hub NPC + Show Choices feed; redacted rows render as disabled choices) and shows only district + rep-eligible gigs. Tier ladder street → corporate → black-ice with rep gates: street rank 0+, corporate rank 2+, black-ice rank 3+. Main-story gigs are exempt from rep gating (always listed when their district is unlocked); optional gigs obey the tier gates — the roster pass tags every gig main/optional. Feed refreshes on accept, on district transfer, and on rep-rank change.
 2. Every gig follows hook → approach → twist → payout; both ghost and loud paths are valid; payout = credits + meter payloads + allegiance tag.
-3. Statuses: available → active → resolved(ghost|loud|mixed) | failed → one retry → resolved(messy, reduced payout, heat+). Active gigs may be abandoned back to available with no penalty.
+3. Gig records use the canonical shape `ch.gigs[id] = {status, approach, retries}`: available → active → resolved (approach ∈ ghost|loud|mixed|messy) | failed → one retry → resolved messy (half payout, heat full). Abandon returns to available with retries PRESERVED (a consumed retry stays consumed — no infinite clean retries). Active gigs may be abandoned freely.
 4. One-shots only: ~15 hand-built gigs (5/5/5 per district), MVP 4–5 in the Sump.
-5. Resolution writes status + approach, fires autosave, and emits meter payloads.
+5. Resolution (owned by the resolution event, never the debrief — single-writer rule) writes status + approach, fires autosave, emits meter payloads + 1 allegiance tag to the gig's listed faction (wardens/chrome/ghosts) on ANY resolved approach including messy; failed/abandoned/active gigs emit zero tags. Debriefs read approach only; messy plays the mixed line per Dialogue.
 6. The system CANNOT: ship gigs without both approaches · add filler/radiant gigs · allow board browsing mid-infiltration (hubs + streets only).
 
 ### States and Transitions
@@ -29,21 +29,20 @@ You're the hottest freelancer on the feed. The fantasy is chosen work, chosen wa
 | State | Meaning | Transitions |
 |---|---|---|
 | Available | On the board, eligible | → Active on accept |
-| Active | Accepted, in progress | → Resolved on completion · → Failed on defeat · → Available on abandon |
-| Resolved:ghost/loud/mixed | Completed with approach recorded | Terminal |
-| Failed | Defeated, retry armed | → Active on retry (once) |
-| Resolved:messy | Completed after failed retry, reduced payout, heat+ | Terminal |
+| Active | Accepted, in progress | → Resolved on completion · → Failed on defeat · → Available on abandon (retries preserved) |
+| Resolved | Completed; approach ∈ ghost/loud/mixed/messy | Terminal |
+| Failed | Defeated, retry armed (if retries left) | → Active on retry (once) · → Available on abandon (retry stays consumed) |
 
 ### Interactions with Other Systems
 
-- **District Maps** (in: districtId/turf filter; out: completion flags → transfers/secrets).
-- **Save-State** (in: `gigs:{id:status}` schema; out: status writes + autosave trigger).
-- **Dialogue & Events** (briefings/debriefings per the beat template, approach acknowledged).
+- **District Maps** (in: districtId/turf filter; out: `ch.flags["gig_<id>_done"]` per completion + `districts[target].unlocked=true` for transfer gigs; plot transfers stay owned by story-beat flags, which win on conflict).
+- **Save-State** (in: canonical `gigs[id] = {status, approach, retries}` schema; out: status writes + autosave trigger).
+- **Dialogue & Events** (briefings/debriefings per the beat template; debrief reads approach, messy plays mixed).
 - **Stealth & Patrol** (in: approach recorded at resolution).
 - **Breach Combat + Hack** (in: battle resolution feeds gig outcome).
 - **Heat/Rep/Turf** (out: meter payloads per gig).
 - **Faction & Endings** (out: allegiance tags per gig).
-- **Onboarding** (first gig is a guided variant with scripted ghost success).
+- **Onboarding** (first gig is a guided variant: scripted-likely ghost, never forced — loud resolves normally under the suppress-all payload override).
 - **Deck-OS UI** (out: feed data — title, fixer, payout, heat risk, district).
 
 ## Formulas
@@ -67,7 +66,7 @@ Approach meter payloads (per gig, applied alongside credits): ghost → rep+2, h
 ## Edge Cases
 
 - **If a gig is accepted and its district then locks** (sequence break): the active gig remains completable; board filters apply to new accepts only.
-- **If a retry is used and the player then abandons**: abandon resets to available with the retry re-armed — no double-punish.
+- **If a retry is used and the player then abandons**: abandon resets to available with the consumed retry STAYING consumed — the exploit is closed; the remaining path is a fresh accept at reduced margin, not a free reset.
 - **If two gigs target the same interior map**: interiors are instanced per gig accept — no shared-state collisions.
 - **If payout is computed with a missing tier** (data error): default to street base 100 + console warning (content bug, caught in QA).
 - **If approach is unrecorded at resolution** (script gap): default to mixed, never block payout.
@@ -76,9 +75,9 @@ Approach meter payloads (per gig, applied alongside credits): ghost → rep+2, h
 ## Dependencies
 
 **Upstream:**
-- **District Maps & Exploration** (hard) — districtId/turf filter; completion flags → transfers/secrets; respects the 2–4 interiors per district cap.
-- **Save-State & Persistence** (hard) — `gigs:{id:status}` schema + autosave trigger; respects the plain-data rule.
-- **Dialogue & Narrative Events** (hard) — briefing/debriefing beat template + approach acknowledgement.
+- **District Maps & Exploration** (hard) — districtId/turf filter; writes `ch.flags["gig_<id>_done"]` + `districts[target].unlocked` for transfer gigs; respects the 2–4 interiors per district cap.
+- **Save-State & Persistence** (hard) — canonical gig record schema + autosave trigger; respects the plain-data rule.
+- **Dialogue & Narrative Events** (hard) — briefing/debriefing beat template; messy plays mixed.
 
 **Downstream:**
 - **Heat/Rep/Turf Reactivity** (hard) — meter payloads out; magnitudes provisional, finals owned there.
@@ -92,13 +91,13 @@ Approach meter payloads (per gig, applied alongside credits): ghost → rep+2, h
 - **gig_count** (15 total, 5/5/5): more = writing + eventing debt against Pillar 4; fewer = thin 3–4h game.
 - **tier_bases** (100/250/500): interacts with implant/gear sinks — sinks must match the ~3,750 lifetime faucet.
 - **messy_modifier** (0.5): lower punishes experimentation; higher makes failure meaningless.
-- **meter payload magnitudes** (provisional — owned by Heat/Rep; listed here as emitted values, not source of truth).
-- **retry_policy** (one retry): unlimited retries erase failure stakes; zero retries strand players on hard gigs.
+- **meter payload magnitudes** (final per Heat/Rep loud-tax rebalance; mirrored here, owned there).
+- **retry_policy** (one retry, preserved across abandon): unlimited retries erase failure stakes; zero retries strand players on hard gigs; abandon-resets-retry enables infinite clean retries — hence preservation.
 
 ## Visual/Audio Requirements
 
 - Board feed as bounty-terminal rows: fixer avatar glyph, neutral tier tabs (district accent reserved for the active district per the art bible — tiers never steal accent meaning), heat-risk pips in Alert Red with icon backup.
-- Acceptance animation: row decrypts + stamps GHOST/LOUD/MESSY in accent.
+- Acceptance animation: row decrypts + stamps GHOST/LOUD/MIXED/MESSY in accent (MESSY in Alert Red + icon per art-bible fail-state semantics).
 - Audio: row-select blip, accept thunk, payout chime from the shared synth kit (mutable in settings).
 
 📌 **Asset Spec** — Visual/Audio requirements are defined. Run `/asset-spec system:gig-board` for feed glyph and stamp specs.
@@ -113,12 +112,12 @@ Approach meter payloads (per gig, applied alongside credits): ghost → rep+2, h
 ## Acceptance Criteria
 
 - **GIVEN** the board, **WHEN** opened in an unlocked district, **THEN** only eligible gigs list with title, fixer, payout, heat risk.
-- **GIVEN** a gig accepted, **WHEN** checked in `ch.gigs`, **THEN** status reads active.
-- **GIVEN** a gig resolved ghost, **WHEN** checked, **THEN** status ghost, autosave written, rep+2/heat+0 applied.
-- **GIVEN** defeat, **WHEN** it happens, **THEN** status failed with retry armed.
-- **GIVEN** retry failed, **WHEN** resolved, **THEN** messy status, half payout, heat+3.
+- **GIVEN** a gig accepted, **WHEN** checked in `ch.gigs`, **THEN** record reads `{status: 'active', approach: null, retries: <unchanged>}`.
+- **GIVEN** a gig resolved ghost, **WHEN** checked, **THEN** record reads `{status: 'resolved', approach: 'ghost'}`, autosave written, Heat/Rep ghost payload applied.
+- **GIVEN** defeat, **WHEN** it happens, **THEN** record reads `{status: 'failed'}` with retry armed iff retries consumed < 1.
+- **GIVEN** retry failed, **WHEN** resolved, **THEN** record reads `{status: 'resolved', approach: 'messy'}`, half payout, Heat/Rep messy payload applied.
 - **GIVEN** 15 gigs, **WHEN** counted, **THEN** every one offers ghost and loud paths.
-- **GIVEN** an active gig, **WHEN** abandoned, **THEN** status returns to available with retry re-armed.
+- **GIVEN** an active gig, **WHEN** abandoned, **THEN** status returns to available with retries preserved (consumed stays consumed).
 
 ## Open Questions
 

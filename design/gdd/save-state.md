@@ -32,7 +32,8 @@ None — pure infrastructure. The player never meets this system; they meet what
 | `faction` | {wardens: int, chrome: int, ghosts: int} | Cumulative standing inputs |
 | `flags` | {key: bool\|int\|string} | Generic narrative storage: beat history, choice records, relationship flags, NPC page flags |
 | `credits_home` | none (absent by design) | Credits live in `$gameParty` gold (explicit). No parallel currency field exists; assert its absence |
-| `meta` | {intro_done: bool, hints_fired: string[]} | Onboarding state |
+| `meta` | {hints_fired: string[]} | Onboarding hint triggers (intro-done lives OUTSIDE `ch` — see global below) |
+| `ConfigManager.ch_introDone` | bool (global, survives New Game) | Single source of truth for intro completion. Written by the intro-complete event AND the skip path; read at the title/new-game branch before `setupNewGame`. Never duplicated into `ch` |
 
 2. Aliased `Game_System.initialize` builds `ch` defaults at new game; loads preserve `ch`, missing fields migrate forward. Alert/suspicion states are never serialized (transient by contract — the Stealth mercy rule falls out of the schema).
 3. `ch.version` is stamped on every write; load runs the tri-state check (see Formulas); stale turf falls back to the last persisted valid state (only keyless saves default to Contested) — per District Maps, the map must not forget.
@@ -102,7 +103,7 @@ No other mathematical formulas exist in this system — heat/rep/turf math belon
 - **Faction & Endings** (hard) — faction standing field owned here.
 - **Breach Combat + Hack** (soft) — writes via gig completion only, never directly.
 - **Deck-OS UI/HUD** (soft) — read-only display of all persisted state.
-- **Onboarding** (hard) — intro-done flag + hint triggers in `ch.meta`.
+- **Onboarding** (hard) — hint triggers in `ch.meta`; intro-done in the global `ConfigManager.ch_introDone` (single source, never in `ch`).
 - **Dialogue & Narrative Events** (hard) — beat history, choice records, relationship flags in `ch.flags`.
 
 ## Tuning Knobs

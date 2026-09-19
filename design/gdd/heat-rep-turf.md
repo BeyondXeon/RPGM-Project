@@ -18,7 +18,7 @@ You're the weather. The fantasy is visible consequence — walking back through 
 ### Core Rules
 
 1. **Meters**: Heat 0–100 (decays) · Rep as lifetime points mapped to rank 0–4 (None 0 → Legend 4) · Turf per district (Contested / Owned:X).
-2. **Approach payloads**: ghost → rep+2, heat+0 · loud → rep+1, heat+3 · mixed → rep+1, heat+1 · messy → rep+0, heat+3. Applied at gig resolution alongside credits. Ghost play is heat-immune by design — heat content is the loud tax, not a universal system. Payload-only loud (no battles) likewise stays cool: loud means fighting, and heat mastery is about managing combat exposure, not gig selection.
+2. **Approach payloads**: ghost → rep+2, heat+0 · loud → rep+1, heat+3 · mixed → rep+1, heat+1 · messy → rep+0, heat+3. Applied at gig resolution alongside credits — EXCEPT the guided tutorial gig, which suppresses all meter payloads per Onboarding (first real gig is the first meter movement). Ghost play is heat-immune by design — heat content is the loud tax, not a universal system. Payload-only loud (no battles) likewise stays cool: loud means fighting, and heat mastery is about managing combat exposure, not gig selection.
 3. **Alert events** feed heat live: Suspicious +1, Alert +3 per incident (one incident = one unit's suspicion crossing 180; same unit cannot contribute again until suspicion fully returns to Calm or map re-entry). Both count as `alert_events` inside the +6 per-gig window cap. Battle noise: +2 per battle fought, +1 extra for escape-loud. All sources within a gig window (payloads + battle + Alerts) cap at +6 total.
 4. **Heat bands**: 0–24 Calm (no consequences) · 25–69 Warm (extra patrol check +1 unit via `density_warm = min(8, patrol_density + 1)`, streets only, applied on map entry; vendors +10% flat at hub shops, shown at point of sale; fixers comment) · 70–100 Hot (pursuit squads on streets, interiors gain +1 scripted patrol authored by the gig script, high-heat-risk-flagged gigs lock until heat < 70 with the reason shown pre-accept).
 5. **Heat decay**: −5 per district transfer, −20 per hub rest (free rest point per hub, usable once per district entry — spam guard built in); never below 0. Rep never decays.
@@ -45,6 +45,7 @@ You're the weather. The fantasy is visible consequence — walking back through 
 - **Faction & Endings** (out: allegiance counts + standing inputs).
 - **Save-State** (heat/rep/turf fields in `ch`; all changes persist immediately).
 - **Deck-OS UI** (out: meter values for the city-eye display).
+- **Onboarding** (guided tutorial gig exempt from ALL payloads — no heat/rep/tags; first real gig is the first meter movement).
 
 ## Formulas
 

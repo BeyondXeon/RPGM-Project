@@ -19,10 +19,11 @@ You're the name on everyone's lips. The fantasy is being *known*: the fixer who 
 
 1. Every story beat follows one template: hook (1–3 lines) → binary choice → consequence lines → meter/flag write.
 2. Both options always write somewhere — no dead choices.
-3. Gig briefings/debriefings use the same template; debriefs acknowledge ghost/loud/mixed approach with at least one variant line.
-4. Bark pools are tiered by rep rank + turf state, max 3 tiers per pool; hub + street pools per district.
+3. Gig briefings/debriefings use the same template; debriefs acknowledge ghost/loud/mixed approach with at least one variant line; messy resolutions play the mixed variant (explicit fallback, not accident).
+4. Bark pools are centralized Common Events — one per (district, context, rep-band): 3 bands × 2 contexts (street/hub) × 3 districts = 18 pool objects max. Each pool holds at most 3 line variants: Contested + current-Owned flavor + fallback. Bark NPCs call their pool object via Action Button; no per-NPC Show Text branches.
 5. Crew auto-banter fires at triggers (first-entry, hub return post-gig, faction beats, recruits) — max 3 exchanges per banter, no chains.
 6. The system CANNOT: offer choiceless choices · nest choices (depth is always choice→consequence) · run speaker turns over 6 lines without a break or choice.
+7. Bark resolution plumbing: a `repRankMirror` game variable is written at every meter payload resolution (and refreshed per interaction via script call fallback); each pool Common Event runs a Conditional Branch ladder on the mirror (0–1 → band 0, 2–3 → band 1, 4 → band 2) then selects the turf variant. Hubs use the identical mapping (no special shift).
 
 ### States and Transitions
 
@@ -30,12 +31,12 @@ You're the name on everyone's lips. The fantasy is being *known*: the fixer who 
 |---|---|---|
 | Beat: Unplayed | Not yet seen | → Played on completion, choice recorded in `ch` |
 | Beat: Played | Seen; choice locked | Terminal (no replays change history) |
-| Bark pool tier | Resolved from rep rank + turf at interaction time | Re-resolved every interaction |
+| Bark pool resolution | Central Common Event per pool reads repRankMirror + turf at interaction time | Re-resolved every interaction |
 | NPC pages | Event pages gate on quest/standing flags | Page up as flags advance |
 
 ### Interactions with Other Systems
 
-- **Gig Board & Missions** — briefings/debriefings frame gigs; writes gig status.
+- **Gig Board & Missions** — briefings/debriefings frame gigs per the beat template; debriefs READ approach, never write gig status (Gig owns `gigs`; Dialogue owns `flags`).
 - **Faction & Endings** — choice beats write faction standing.
 - **Crew & Recruitment** — banter writes relationship flags.
 - **Heat/Rep/Turf** — ranks select bark tiers + greeting variants.
@@ -43,6 +44,8 @@ You're the name on everyone's lips. The fantasy is being *known*: the fixer who 
 - **Onboarding** — tutorial beats reuse the same template.
 
 ## Formulas
+
+Terminology (locked): POOL = one centralized Common Event object per (district, context, rep-band) · BAND = rep-band index 0–2 (replaces all "tier"/"pool_index" synonyms) · VARIANT = turf-flavored line set within a pool.
 
 The `bark_tier` resolution is defined as:
 
@@ -52,28 +55,28 @@ The `bark_tier` resolution is defined as:
 
 | Variable | Symbol | Type | Range | Description |
 |---|---|---|---|---|
-| Reputation rank | rep_rank | int | 0–4 | Player rep rank (None 0 → Legend 4) |
-| Pool index | pool | int | 0–2 | Street pool: ranks 0–1 → 0 (unknown), ranks 2–3 → 1 (known), rank 4 → 2 (legend); hub pools shift +0 (hubs are friendly ground) |
-| Turf flavor | turf | enum | Contested / Owned:X / Resolved | Selects the line variant within the pool, never a different pool |
+| Reputation rank | rep_rank | int | 0–4 | Player rep rank (None 0 → Legend 4); mirrored to the `repRankMirror` game variable at payload resolution |
+| Pool index | pool | int | 0–2 | ranks 0–1 → 0 (unknown), ranks 2–3 → 1 (known), rank 4 → 2 (legend); identical for street and hub contexts |
+| Turf flavor | turf | enum | Contested / Owned:X / fallback | Selects the line variant within the pool, never a different pool; Resolved districts play the fallback variant |
 
-**Output Range:** one pool (0–2) + one variant per interaction; exactly 3 pools per district per context (street/hub), 18 pools game-wide max (Pillar 4 cap).
-**Example:** rep rank 3 in Market, turf Owned:Red → street pool 1, Red-flavored lines.
+**Output Range:** one pool (0–2) + one variant per interaction; 18 pool objects max, ≤3 variants each (Contested + Owned flavor + fallback), ≈108 bark lines ceiling game-wide (Pillar 4 cap, see Tuning).
+**Example:** rep rank 3 in Market, turf Owned:Chrome → pool object `market_street_1` plays its Chrome-flavored lines.
 
 ## Edge Cases
 
 - **If a Played beat is re-triggered**: show a one-line recap, no re-choice — history is immutable.
 - **If a beat fires while another beat is active**: queued — beats never interrupt beats; banter waits for the beat to end.
 - **If an NPC is talked to while alerted in a restricted zone**: barks suppressed — stealth readability first.
-- **If a turf-flavor line is missing**: fall back to Contested lines silently in release (content gap — caught in the QA content pass).
-- **If a debrief has an unclassifiable approach**: default to the mixed variant.
+- **If a turf-flavor line is missing**: fall back to the fallback variant and log the missing key to console in ALL builds (missing content must never become silent canon — Pillar 2).
+- **If a debrief has an unclassifiable approach**: default to the mixed variant (messy resolutions land here by design, not accident).
 - **If a line overflows the message window**: writing pass enforces per-turn caps; overflow is a content bug, not an engine problem.
 
 ## Dependencies
 
-**Upstream:** none hard — the MZ eventing substrate is assumed. Reads `rep_rank`/turf from the Heat/Rep + District contracts (both undesigned — the 0–4 rank scale is defined here provisionally; the Heat/Rep GDD owns it and may revise with a conflict flag).
+**Upstream:** none hard — the MZ eventing substrate is assumed. Reads `rep_rank`/turf from the Heat/Rep (Designed — 0–4 scale confirmed, no conflict) + District contracts; writes via the `repRankMirror` variable and `ch.flags`.
 
 **Downstream:**
-- **Gig Board & Missions** (hard) — briefing/debriefing template + gig status writes.
+- **Gig Board & Missions** (hard) — briefing/debriefing beat template; Dialogue writes `flags` only, never `gigs` (single-writer rule).
 - **Faction & Endings** (hard) — choice beats write faction standing.
 - **Crew & Recruitment** (hard) — banter writes relationship flags.
 - **Onboarding** (hard) — tutorial beats reuse the beat template.
@@ -82,10 +85,11 @@ The `bark_tier` resolution is defined as:
 
 ## Tuning Knobs
 
-- **pools_per_district** (3 street + 3 hub max): more = writing debt with no gameplay return.
+- **pools_per_district** (3 bands × 2 contexts max): more = writing debt with no gameplay return.
+- **bark_line_ceiling** (108 bark lines game-wide: 18 pools × ≤3 variants × ~2 lines): the Pillar 4 budget for reactive dialogue; overages cut variants (never pools — coverage first, flavor second).
 - **banter_exchanges_cap** (3): longer = cutscene creep inside a gig loop.
 - **speaker_turn_lines** (6 max): more breaks message-window rhythm.
-- **rep_tier_thresholds** (provisional 0–4 mapping): owned by the Heat/Rep GDD — listed here as consumed values, not source of truth.
+- **rep_tier_thresholds** (confirmed 0–4 mapping): owned by the Heat/Rep GDD — listed here as consumed values, not source of truth.
 - **choices_per_beat** (LOCKED at 2): not a knob — raising it breaks the beat template and Pillar 4.
 
 ## Visual/Audio Requirements
@@ -107,13 +111,13 @@ The `bark_tier` resolution is defined as:
 
 - **GIVEN** any story beat, **WHEN** played, **THEN** it follows hook→choice→consequence→write with no console errors.
 - **GIVEN** any choice, **WHEN** selected, **THEN** the corresponding meter/flag changes observably.
-- **GIVEN** a gig debrief, **WHEN** the gig was ghosted, **THEN** at least one ghost-acknowledging line plays (and loud/mixed equivalents for those approaches).
+- **GIVEN** a gig debrief, **WHEN** the gig was ghosted, **THEN** at least one ghost-acknowledging line plays (loud/mixed equivalents for those approaches; messy plays the mixed line by design).
 - **GIVEN** rep rank 4, **WHEN** talking to a street NPC, **THEN** legend-pool lines play.
 - **GIVEN** a Played beat, **WHEN** re-triggered, **THEN** recap line only, history unchanged.
-- **GIVEN** 18 bark pools, **WHEN** counted, **THEN** none exceed 3 tiers and every pool resolves a tier without errors.
+- **GIVEN** 18 pool objects, **WHEN** counted, **THEN** each holds ≤3 variants and every pool resolves its band without errors.
 
 ## Open Questions
 
 - Font choice for bitmap text rendering at 26px+ — owner: art-bible/art pass.
 - Name-box vs. inline speaker tags — owner: prototype.
-- Total line-count budget for the 3–4h script — owner: writing pass (Pillar 4 cap TBD).
+- Total line-count budget for the 3–4h script — owner: writing pass (bark ceiling set at 108; beat/banter budget TBD).

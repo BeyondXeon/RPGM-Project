@@ -18,11 +18,12 @@ You're the breach. The fantasy is turning the enemy's house against them — the
 ### Core Rules
 
 1. Side-view turn-based battles; party of 1–4 crew; troops built per gig interior from a roster of 6–8 enemy types.
-2. Hack command (JS plugin skill): targets battlefield objects, not enemies — Camera (stuns a troop 1 turn + reveals hidden), Turret (overloads to strike enemies once), Door (seals, blocks one reinforcement wave). Each object hackable once per battle.
-3. Standard Attack/Skills/Items alongside Hack; Hack costs TP (breach meter) that rebuilds per battle.
-4. Victory resolves the gig objective; any battle marks approach loud; rewards flush at gig completion, never mid-battle. Defeat = gig Failed (retry per Gig Board).
-5. Forced battles (stealth catch) start with an Alert penalty (enemy preemptive chance up).
-6. The system CANNOT: Hack with no target object present · Hack the same object twice · save mid-battle · field troops above 4 enemies + 1 object set (perf + readability cap).
+2. Hack command (JS plugin skill — plugin committed, prototype validates): battlefield objects are immortal hidden enemies carrying `<chObject:camera|turret|door>` note-tags, excluded from victory conditions, selected through an aliased `Window_BattleEnemy` filter (per CLAUDE.md code authority: alias-never-overwrite, IIFE, save-safe init). Effects — Camera (stuns ONE enemy 1 turn), Turret (overloads to strike one player-selected enemy once), Door (seals, blocks one reinforcement wave). Each object hackable once per battle.
+3. Standard Attack/Skills/Items alongside Hack; Hack costs TP: start 30 per battle, +20 per turn (Camera T1, Door T1, Turret from T2 — costs bind from the opening round).
+4. Victory resolves the gig objective; any battle marks approach loud (combat never produces mixed — mixed is stealth-only); rewards flush at gig completion, never mid-battle. Defeat = gig Failed (retry per Gig Board).
+5. Forced battles (stealth catch) start with an Alert penalty (enemy preemptive chance up). Escape routes to the same map's entry point: the catching unit stays Alert, all others drop to Suspicious (configure per troop via `BattleManager.canEscape`).
+6. Reinforcement waves: black-ice troops + corporate troops in Market/Spire interiors (the top half by roster order — roster pass tags each troop `waves:0|1`) queue exactly 1 wave of 2 units (trigger: turn 3 OR half the troop defeated, whichever first); Sump troops queue none. District sets the HP/turret numbers, tier sets the wave rule — a Market corporate troop uses Market HP with corporate waves. Queued waves are telegraphed (Door target shows armed icon) so sealing is an informed choice, never a gamble.
+7. The system CANNOT: Hack with no target object present · Hack the same object twice · save mid-battle · field troops above 4 enemies + 1 object set (perf + readability cap).
 
 ### States and Transitions
 
@@ -57,10 +58,18 @@ The `turret_strike` formula is defined as:
 | District index | idx | int | 0–2 | Sump 0 → 150 · Market 1 → 250 · Spire 2 → 350 (tracks enemy HP growth) |
 | Variance | var | ±20% | — | MZ standard damage variance |
 
-**Output Range:** 120 to 420 per overload, single enemy target, once per battle per turret.
+**Output Range:** 120 to 420 per overload, player-selected single enemy target, once per battle per turret.
 **Example:** Market turret overloaded: 250 ± 20% = 200–300 to one enemy.
 
-Hack TP costs (TP max 100, rebuilds per battle): Camera 20 · Door 30 · Turret 40. Preemptive chance: base 5% + 25% if forced battle (Alert penalty) − 10% with ghost-tier implant (future hook). Stun duration fixed at 1 turn (not a knob — keeps Hack tactical, not dominant).
+Enemy HP ladder (turret tuned to a 40–60% chunk, never a kill):
+
+| District | Grunt HP | Brute/Elite HP | Turret roll vs grunt |
+|---|---|---|---|
+| Sump | 280–340 | 420–520 (brute) | 120–180 ≈ 40–65% |
+| Market | 450–550 | 650–800 (brute) | 200–300 ≈ 40–60% |
+| Spire | 800–1000 (elite) | 1200+ (boss) | 280–420 ≈ 35–53% |
+
+Hack TP costs (TP max 100, start 30, +20/turn): Camera 20 · Door 30 · Turret 40. Preemptive chance: base 5% + 25% if forced battle (Alert penalty) − 10% with ghost-tier implant (future hook). Stun duration fixed at 1 turn on ONE enemy (not a knob — keeps Hack tactical, not dominant).
 
 ## Edge Cases
 
@@ -82,14 +91,14 @@ Hack TP costs (TP max 100, rebuilds per battle): Camera 20 · Door 30 · Turret 
 **Downstream:**
 - **Gig Board & Missions** (hard) — battle resolution + loud approach out.
 - **Heat/Rep/Turf Reactivity** (hard) — battle noise payloads out.
-- **Chrome Implants** (soft) — Hack potency/target hooks in.
+- **Chrome Implants** (soft) — Hack potency/target hooks in; until that GDD lands, all implant hooks behave as defaults (no modifier, all targets available).
 - **Onboarding** (soft) — scripted first battle.
 
 ## Tuning Knobs
 
-- **hack_tp_costs** (Camera 20 / Door 30 / Turret 40): cheaper = Hack dominates Attack; pricier = Hack never fires.
+- **hack_tp_costs** (Camera 20 / Door 30 / Turret 40; start 30, +20/turn): cheaper = Hack dominates Attack; pricier = Hack never fires; lower start delays the first Hack past turn 2.
 - **turret_base** (150 + 100/idx): tracks enemy HP growth — retune if troops outgrow Sump math.
-- **stun_duration** (LOCKED at 1): longer stuns break encounter balance.
+- **stun_duration** (LOCKED at 1, ONE enemy): longer stuns or wider targets break encounter balance.
 - **troop_cap** (4 enemies + 1 object set): more = unreadable battlefield + slow turns.
 - **preemptive_rate** (5% base, +25% forced): higher = forced battles feel doomed; lower = the Alert penalty is theater.
 - **enemy_roster_size** (6–8 types): fewer = repetitive troops; more = art debt.
@@ -115,15 +124,15 @@ Hack TP costs (TP max 100, rebuilds per battle): Camera 20 · Door 30 · Turret 
 ## Acceptance Criteria
 
 - **GIVEN** a battle with objects, **WHEN** the Hack menu opens, **THEN** Camera/Turret/Door targets list with TP costs.
-- **GIVEN** a Camera Hack, **WHEN** resolved, **THEN** one troop stunned 1 turn and hidden revealed.
-- **GIVEN** a Turret Hack, **WHEN** resolved, **THEN** one enemy takes district-scaled damage.
-- **GIVEN** a Door Hack, **WHEN** reinforcements queued, **THEN** the wave never arrives.
-- **GIVEN** victory, **WHEN** tallied, **THEN** gig records loud and rewards flush at completion with no mid-battle save.
-- **GIVEN** a forced battle, **WHEN** intro rolls, **THEN** enemy preemptive chance is elevated.
+- **GIVEN** a Camera Hack, **WHEN** resolved, **THEN** one enemy stunned 1 turn.
+- **GIVEN** a Turret Hack, **WHEN** resolved, **THEN** one player-selected enemy takes district-scaled damage per the Formulas table (Sump 120–180 / Market 200–300 / Spire 280–420, ±20%).
+- **GIVEN** a Door Hack, **WHEN** a wave is queued (armed icon visible), **THEN** the wave never arrives; **WHEN** no wave queued, **THEN** 30 TP refunded and the object stays hackable.
+- **GIVEN** victory, **WHEN** tallied, **THEN** gig records loud (never mixed), credits/approach/heat apply exactly once at gig completion; battle-active save attempts are refused.
+- **GIVEN** a forced battle, **WHEN** intro rolls over seeded rolls, **THEN** enemy preemptive chance is 30% (5% base + 25% forced).
 - **GIVEN** any troop, **WHEN** counted, **THEN** enemies ≤ 4 plus one object set.
+- **GIVEN** two actors targeting the same object, **WHEN** the first resolves, **THEN** the second returns to target selection with turn unconsumed.
 
 ## Open Questions
 
 - Side-view battler art pipeline (AI-assisted vs. RTP edits) — owner: art pass, MVP-critical.
-- Hack plugin vs. pure-evented final call — owner: prototype.
-- Reinforcement wave design per troop — owner: troop design pass.
+- MVP art floor lock (2 crew battlers + 3 Sump enemy types + 1 battleback to start; roster-fallback rule covers the rest) — owner: art pass, pre-implementation gate.
