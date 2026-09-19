@@ -122,5 +122,5 @@ Approach meter payloads (per gig, applied alongside credits): ghost → rep+2, h
 ## Open Questions
 
 - Exact 15-gig roster titles — owner: writing pass.
-- Implant/gear sink totals to match the ~3,750 lifetime faucet — owner: Chrome Implants GDD.
+- Implant/gear sink totals vs the ~3,750 faucet — RESOLVED: implant roster costs 7,800 full (≈48% affordable); see Chrome Implants GDD.
 - Final meter magnitudes — owner: Heat/Rep GDD.

@@ -21,15 +21,15 @@ CHROME HEART CITY is a 3–4 hour cyberpunk street-crew JRPG (RPG Maker MZ): an 
 | 2 | Stealth & Patrol | Gameplay | MVP | Approved | design/gdd/stealth-patrol.md | District Maps |
 | 3 | Breach Combat + Hack | Gameplay | MVP | Approved | design/gdd/breach-combat.md | Save-State |
 | 4 | Heat/Rep/Turf Reactivity | Gameplay | MVP | Approved | design/gdd/heat-rep-turf.md | Gig Board, Save-State |
-| 5 | Chrome Implants | Progression | Vertical Slice | Not Started | — | Breach Combat, Stealth |
-| 6 | Faction & Endings | Narrative | Vertical Slice | Not Started | — | Heat/Rep/Turf, Dialogue |
+| 5 | Chrome Implants | Progression | Vertical Slice | Designed | design/gdd/chrome-implants.md | Breach Combat, Stealth |
+| 6 | Faction & Endings | Narrative | Vertical Slice | Designed | design/gdd/faction-endings.md | Heat/Rep/Turf, Dialogue |
 | 7 | Crew & Recruitment | Narrative | Alpha | Not Started | — | Breach Combat, Dialogue |
 | 8 | District Maps & Exploration | World | MVP | Approved | design/gdd/district-maps.md | — |
 | 9 | Save-State & Persistence (inferred) | Persistence | MVP | Approved | design/gdd/save-state.md | — |
 | 10 | Onboarding (inferred) | Meta | MVP | Approved | design/gdd/onboarding.md | Gig Board, Stealth |
-| 11 | Deck-OS UI/HUD | UI | Vertical Slice | Not Started | — | Gig Board, Heat/Rep/Turf |
-| 12 | Lighting & Atmosphere (inferred) | Presentation | Vertical Slice | Not Started | — | District Maps |
-| 13 | Audio Direction (inferred) | Audio | Vertical Slice | Not Started | — | — |
+| 11 | Deck-OS UI/HUD | UI | Vertical Slice | Designed | design/gdd/deck-os-ui.md | Gig Board, Heat/Rep/Turf |
+| 12 | Lighting & Atmosphere (inferred) | Presentation | Vertical Slice | Designed | design/gdd/lighting-atmosphere.md | District Maps |
+| 13 | Audio Direction (inferred) | Audio | Vertical Slice | Designed | design/gdd/audio-direction.md | — |
 | 14 | Dialogue & Narrative Events (inferred) | Narrative | MVP | Approved | design/gdd/dialogue-events.md | — |
 
 ---

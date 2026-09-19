@@ -69,7 +69,7 @@ Enemy HP ladder (turret tuned to a 40–60% chunk, never a kill):
 | Market | 450–550 | 650–800 (brute) | 200–300 ≈ 40–60% |
 | Spire | 800–1000 (elite) | 1200+ (boss) | 280–420 ≈ 35–53% |
 
-Hack TP costs (TP max 100, start 30, +20/turn): Camera 20 · Door 30 · Turret 40. Preemptive chance: base 5% + 25% if forced battle (Alert penalty) − 10% with ghost-tier implant (future hook). Stun duration fixed at 1 turn on ONE enemy (not a knob — keeps Hack tactical, not dominant).
+Hack TP costs (TP max 100, start 30, +20/turn): Camera 20 · Door 30 · Turret 40. Preemptive chance: base 5% + 25% if forced battle (Alert penalty) − 10% with Deck T3 black-ice suite. Stun duration fixed at 1 turn on ONE enemy (not a knob — keeps Hack tactical, not dominant).
 
 ## Edge Cases
 
@@ -91,7 +91,7 @@ Hack TP costs (TP max 100, start 30, +20/turn): Camera 20 · Door 30 · Turret 4
 **Downstream:**
 - **Gig Board & Missions** (hard) — battle resolution + loud approach out.
 - **Heat/Rep/Turf Reactivity** (hard) — battle noise payloads out.
-- **Chrome Implants** (soft) — Hack potency/target hooks in; until that GDD lands, all implant hooks behave as defaults (no modifier, all targets available).
+- **Chrome Implants** (soft) — Hack potency/target flags in (skim, deep-scan, black-ice); unowned tiers behave as defaults.
 - **Onboarding** (soft) — scripted first battle.
 
 ## Tuning Knobs

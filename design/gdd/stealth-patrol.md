@@ -40,7 +40,7 @@ You're smoke. The fantasy is untouchable rhythm — gliding through cones by hal
 - **Heat/Rep/Turf** (out: Alert events raise heat).
 - **Breach Combat** (out: forced-battle trigger on catch).
 - **Dialogue & Events** (approach variants in debriefs).
-- **Chrome Implants** (in: future cone/range modifiers — hooks reserved, values later).
+- **Chrome Implants** (in: optic/frame flags — wall-sight, dead-zone, flatline, ghostwalk, parity).
 - **Lighting & Atmosphere** (sightline glow sync with alert states).
 - **Onboarding** (scripted-calm patrols for the guided first gig).
 
@@ -62,7 +62,7 @@ Per-unit `suspicion` accumulation drives state ENTRY only (bands below are entry
 **Output Range:** per-unit suspicion ∈ [0, 180]; <60 Calm · 60–179 Suspicious · ≥180 Alert.
 **Example:** visible 60 checks ≈ 1s wall-clock → 60+ → Suspicious, investigating; break sight → 300f hold fires forced jump → Calm (accumulator 0). Visible 180+ → Alert, pursuit; break sight 480f → forced jump to Suspicious (fresh 300f hold starts); still unseen → Calm.
 
-Cone geometry (exact tile set): facing direction D, range 4 — tiles D×1 through D×4, plus lateral ±1 at distances 1–3. Hiding spots and future implant modifiers subtract effective range (hooks reserved, values in the Implants GDD).
+Cone geometry (exact tile set): facing direction D, range 4 — tiles D×1 through D×4, plus lateral ±1 at distances 1–3. Optic/Frame installs modify effective range per the Implants GDD (wall-sight, dead-zone, ghostwalk).
 
 ## Edge Cases
 
@@ -85,7 +85,7 @@ Cone geometry (exact tile set): facing direction D, range 4 — tiles D×1 throu
 - **Heat/Rep/Turf Reactivity** (hard) — Alert events out.
 - **Breach Combat + Hack** (hard) — forced-battle trigger out.
 - **Onboarding** (hard) — scripted-calm patrols for the guided gig.
-- **Chrome Implants** (soft) — cone/range modifier hooks reserved.
+- **Chrome Implants** (soft) — optic/frame capability flags in.
 - **Lighting & Atmosphere** (soft) — sightline glow sync with alert states.
 
 ## Tuning Knobs

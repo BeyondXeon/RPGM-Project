@@ -176,3 +176,60 @@
   value: 2
   source: design/gdd/onboarding.md
   referenced_by: []
+
+- name: overlay_layer_cap
+  type: constant
+  value: 4 (ambient + accent + turf preset + dynamic)
+  source: design/gdd/lighting-atmosphere.md
+  referenced_by: []
+
+- name: rain_rates
+  type: constant
+  values: {Calm: 40, Warm: 90, Hot: 150}
+  note: particles/s, prototype-tunable against 60fps budget
+  source: design/gdd/lighting-atmosphere.md
+  referenced_by: []
+
+- name: deck_surfaces
+  type: constant
+  value: 8 (city-eye, map, gig feed, dialogue layer, save, battle HUD, pips/projection, toasts/settings)
+  source: design/gdd/deck-os-ui.md
+  referenced_by: []
+
+- name: ui_motion
+  type: constant
+  values: {decrypt_snap_ms: 120-180, toast_lifetime_s: 3}
+  source: design/gdd/deck-os-ui.md
+  referenced_by: []
+
+- name: audio_budgets
+  type: constant
+  values: {bgm_tracks: 6, bgm_cap_mb: 3, sfx_cap_kb: 200, duck_bed: 0.7, duck_pursuit: 0.5}
+  source: design/gdd/audio-direction.md
+  referenced_by: []
+
+- name: ending_select
+  type: formula
+  variables: [faction standing, tiebreak choice]
+  output: Wardens | Chrome | Ghosts
+  source: design/gdd/faction-endings.md
+  referenced_by: []
+
+- name: standing_weights
+  type: constant
+  values: {gig_tag: 1, story_choice: 2}
+  source: design/gdd/faction-endings.md
+  referenced_by: []
+
+- name: implant_prices
+  type: constant
+  values: {T1: 300, T2: 800, T3: 1500}
+  note: full roster 7800 vs ~3750 faucet — half affordable by design
+  source: design/gdd/chrome-implants.md
+  referenced_by: []
+
+- name: implant_slots
+  type: constant
+  values: [Optic, Frame, Deck]
+  source: design/gdd/chrome-implants.md
+  referenced_by: []
